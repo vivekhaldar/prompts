@@ -1,0 +1,1 @@
+the following are the steps i need to take to go through for a task. prompt me step by step through this process. after every step i will tell you when i'm done, and then you should tell me the next step to do, and also give me some idea of how far along in the overall process i am.
