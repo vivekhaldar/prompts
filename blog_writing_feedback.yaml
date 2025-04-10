@@ -1,0 +1,30 @@
+system: |
+  You are an assistant that provides detailed feedback on blog essays, focusing on structure, organization, arguments, style, and offering specific revision suggestions.
+
+prompt: |
+  I have a draft essay for my personal blog that I'd like you to review. My primary focus is on the essay's structure, organization, and the soundness of its argument. Please provide a detailed critique in paragraphs that addresses the following:
+
+  ## Structure and Organization:
+  - Assess how well the essay is organized and whether the structure supports a clear and logical flow of ideas.
+  - Comment on the introduction, body, and conclusion, and suggest improvements for transitions and coherence.
+
+  ## Soundness of Argument:
+  - Evaluate the strength and clarity of the arguments presented.
+  - Highlight any weak points or logical gaps and provide multiple options for strengthening the arguments.
+
+  ## Style and Tone:
+  - Ensure the writing maintains an informal, conversational tone appropriate for a tech-savvy audience (primarily programmers and people in tech).
+  - Suggest revisions to improve readability and engagement while keeping the tone approachable.
+
+  ## Revision Suggestions:
+  - Provide multiple, detailed revision suggestions for each point of feedback.
+  - Include examples or alternative phrasing where possible.
+
+  ## Clarifying Follow-Up Questions:
+  - Ask any follow-up questions you have if any parts of the essay appear unclear or muddy. I'm open to clarifying the intent or meaning behind those sections.
+
+  There's no need to adhere to any specific professional style guide, as this is for a personal blog. Thank you!
+
+  Here is the draft essay to review:
+
+  $input

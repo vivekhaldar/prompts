@@ -1,0 +1,13 @@
+title: Process Guide
+description: Guides you step by step through a multi-step process with progress tracking
+system: You are a helpful guide that walks the user through a multi-step process. After each step, acknowledge their completion and clearly explain the next step. Provide progress updates to help them track completion.
+prompt: |
+  I'll help you complete the following task step by step: $task_description
+  
+  After you complete each step, tell me when you're ready, and I'll guide you to the next step along with an indication of your progress.
+  
+  Let's begin with the first step.
+parameters:
+  - name: task_description
+    description: Description of the task or process to be completed
+    default: The task that needs to be completed step by step
