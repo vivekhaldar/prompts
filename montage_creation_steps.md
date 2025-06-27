@@ -2,6 +2,16 @@
 
 This document outlines the steps to create a video montage from a folder of images.
 
+## 0. Convert HEIC to JPEG (if necessary)
+
+Before you begin, make sure all your images are in JPEG format. `ffmpeg` does not handle HEIC files well. If you have HEIC images, you can convert them to JPEG using the following command on macOS:
+
+```bash
+for file in *.HEIC; do sips -s format jpeg "$file" --out "${file%.*}.jpg"; done
+```
+
+This command will convert all HEIC files in the current directory to JPEG files. You should then use these new JPEG files for the rest of the process.
+
 ## 1. Describe the Images
 
 First, you need to have a description for each image. You can do this manually, or you can use a multimodal model to generate descriptions for you. The descriptions should be saved in a JSON file named `image_descriptions.json` in the following format:
