@@ -14,7 +14,7 @@ This command will convert all HEIC files in the current directory to JPEG files.
 
 ## 1. Describe the Images
 
-First, you need to have a description for each image. Use a multimodal model, such as Gemini 2.5 Pro, to examine each image and then generate descriptions for them. The descriptions should be saved in a JSON file named `image_descriptions.json` in the following format:
+First, you need to have a description for each image. Use a multimodal model, such as Gemini 2.5 Pro, to examine each image and then generate detailed descriptions for them. The descriptions should be saved in a JSON file named `image_descriptions.json` in the following format:
 
 ```json
 [
@@ -31,13 +31,7 @@ First, you need to have a description for each image. Use a multimodal model, su
 
 ## 2. Create Shortened Captions
 
-Create shortened, vlog-style captions for each image. Here are the captions that were used in the video:
-
-1.  "Exploring the Japanese Tea Garden"
-2.  "Pizza with a view of the Golden Gate"
-3.  "Checking out the cool lighthouse lens!"
-4.  "Beach day selfie!"
-5.  "Homeward bound!"
+Create shortened, vlog-style captions for each image, suitable for text overlays in a vlog photo montage.
 
 ## 3. Download Background Music
 
@@ -53,11 +47,11 @@ Use the following `ffmpeg` command to create the video montage. This command wil
 
 *   Take your images as input.
 *   Apply a Ken Burns (zoom and pan) effect to each image.
-*   Overlay the shortened captions onto each corresponding image segment of the video.
+*   Overlay the shortened captions from step #2 onto each corresponding image segment of the video.
 *   Add the downloaded music as the background audio track.
 *   Scale the images to fit the video's dimensions while preserving their original aspect ratio and adding black bars to fill the empty space.
 
-**Note:** You will need to replace the image file names and the text for the captions in the command below with your own.
+**Important Note:** You will need to replace the image file names and the text for the captions in the command below with the specific ones you are currently working with.
 
 ```bash
 ffmpeg -y \
