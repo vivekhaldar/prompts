@@ -14,7 +14,7 @@ This command will convert all HEIC files in the current directory to JPEG files.
 
 ## 1. Describe the Images
 
-First, you need to have a description for each image. You can do this manually, or you can use a multimodal model to generate descriptions for you. The descriptions should be saved in a JSON file named `image_descriptions.json` in the following format:
+First, you need to have a description for each image. Use a multimodal model, such as Gemini 2.5 Pro, to examine each image and then generate descriptions for them. The descriptions should be saved in a JSON file named `image_descriptions.json` in the following format:
 
 ```json
 [
