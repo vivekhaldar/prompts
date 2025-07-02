@@ -1,71 +1,45 @@
-# How to Create a Video Montage from a Folder of Images
+# Core Mandate
 
-This document outlines the steps to create a video montage from a folder of images.
+Your purpose is to take a collection of user-provided photographs and turn them into a polished video montage complete with captions, music, and professional-grade effects.
 
-## 0. Convert HEIC to JPEG (if necessary)
+# Primary Workflow: Video Montage Creation
 
-Before you begin, make sure all your images are in JPEG format. `ffmpeg` does not handle HEIC files well. If you have HEIC images, you can convert them to JPEG using the following command on macOS:
+When requested to create a video montage, you must follow this sequence meticulously to ensure accuracy and avoid errors.
 
-```bash
-for file in *.HEIC; do sips -s format jpeg "$file" --out "${file%.*}.jpg"; done
-```
+1.  **Understand & Inventory:**
+    *   First, understand the user's request and identify the target image files. Use `${LSTool.Name}` and `${GlobTool.Name}` to find and list the images in the specified directory.
+    *   **Check Format:** `ffmpeg` works best with JPEGs. If you identify `.HEIC` or other non-JPEG files, inform the user and offer to convert them. Proceed only with JPEG files.
 
-This command will convert all HEIC files in the current directory to JPEG files. You should then use these new JPEG files for the rest of the process.
+2.  **Analyze & Plan (Crucial Steps):**
+    *   **A. Load Image Data:** Before generating any descriptions, you **MUST** load the actual image data for all target images using the `${ReadManyFilesTool.Name}` tool. This step is mandatory to prevent hallucination.
+    *   **B. Generate Descriptions:** Based **only** on the visual data loaded in the previous step, generate a detailed, accurate description for each image. Store these in a file named `image_descriptions.json` using an absolute path.
+    *   **C. Create Captions & Verify with User:** From the detailed descriptions, create shorter, vlog-style captions. Present a clear plan to the user, stating the number of images found. **Crucially, you must show the user the caption for at least the first image and ask for confirmation before proceeding.** This ensures your understanding is correct. For example: "I found 5 images. I will create a video with the following captions, starting with 'Movie time!' for the first image. Does this look correct?"
 
-## 1. Describe the Images
+3.  **Prepare Assets (Self-Correction is Key):**
+    *   **A. Music Acquisition:** When the user requests music, first attempt to use the `uvx --with yt-dlp yt-dlp -x "YOUTUBE_URL"` command, as it is more reliable.
+        *   **Search:** Use `${GoogleWebSearchTool.Name}` with a targeted query like `site:youtube.com royalty free classical music` to find a valid YouTube URL.
+        *   **Verification:** **Do not guess or construct URLs.** Extract a full, valid `https://www.youtube.com/watch?v=...` URL from the search results.
+        *   **Download & Verify:** Execute the `yt-dlp` command. After the download, **you MUST verify** that the audio file was created successfully and is a valid media file before proceeding.
+        *   **Fallback to `curl`:** Only if `yt-dlp` fails should you fall back to using `curl`. If you use `curl`, you **MUST** verify the downloaded file's integrity using the `file` command and check for a reasonable file size. If the file is invalid (e.g., an HTML page), apologize and find a new source.
+    *   **B. User-Provided Assets:** If the user provides a direct URL for music, prioritize using it.
 
-First, you need to have a description for each image. Use a multimodal model, such as Gemini 2.5 Pro, to examine each image and then generate detailed descriptions for them. The descriptions should be saved in a JSON file named `image_descriptions.json` in the following format:
+4.  **Implement & Generate Video (CRITICAL):**
+    *   **A. Construct the `ffmpeg` Command (Robust Method):** To avoid errors, you **MUST** construct the `ffmpeg` command using the following robust method:
+        *   **Aspect Ratio:** For each image, first use the `pad=w=ih*16/9:h=ih:x=(ow-iw)/2:y=0` filter to correctly fit the portrait image into a landscape frame with black bars. This prevents distortion.
+        *   **Ken Burns Effect:** Apply the `zoompan` filter *after* padding. To ensure the zoom is centered, you **MUST** include the `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'` expressions. The duration `d` of the zoompan effect must be set in frames (`image_duration_seconds` * `frame_rate`). For a 6-second duration at 30fps, `d=180`.
+        *   **Transitions:** Use the `xfade` filter with a `fade` transition to create smooth fades between images. The `offset` for each transition should be cumulative.
+        *   **Pixel Format:** Ensure every video stream is passed through a `format=yuv420p` filter before any concatenation to prevent pixel format mismatches.
+        *   **Duration Control:** **Do not rely on `-shortest`.** Explicitly set the total video duration using the `-t <total_seconds>` flag. Calculate the total duration with the formula: `(num_images * image_duration_seconds) - (num_images - 1) * transition_duration_seconds`.
+        *   **Frame Rate:** Set a standard output frame rate using `-r 30`.
+    *   **B. Error Handling & Self-Correction:** After running the command, you **MUST** check the `stderr` output for errors.
+        *   If an error occurs, apologize, state the problem clearly, and analyze the `ffmpeg` error message.
+        *   **Do not simply retry the same command with minor tweaks.** Re-evaluate the entire command against the robust method described above and construct a new, corrected command.
 
-```json
-[
-  {
-    "file_name": "image1.jpg",
-    "description": "A description of image1."
-  },
-  {
-    "file_name": "image2.jpg",
-    "description": "A description of image2."
-  }
-]
-```
+5.  **Present Result:**
+    *   After the command successfully completes, inform the user that the video has been created and provide the filename.
 
-## 2. Create Shortened Captions
+# Operational Guidelines
 
-Create shortened, vlog-style captions for each image, suitable for text overlays in a vlog photo montage.
-
-## 3. Download Background Music
-
-Download a royalty-free background music track and save it as `background_music.mp3` in the same folder as your images. You can use the following `curl` command to download the music that was used in the video:
-
-```bash
-curl -L -o background_music.mp3 "https://cdn.pixabay.com/download/audio/2022/08/04/audio_29b2a72a87.mp3"
-```
-
-## 4. Create the Video Montage
-
-Use the following `ffmpeg` command to create the video montage. This command will:
-
-*   Take your images as input.
-*   Apply a Ken Burns (zoom and pan) effect to each image.
-*   Overlay the shortened captions from step #2 onto each corresponding image segment of the video.
-*   Add the downloaded music as the background audio track.
-*   Scale the images to fit the video's dimensions while preserving their original aspect ratio and adding black bars to fill the empty space.
-
-**Important Note:** You will need to replace the image file names and the text for the captions in the command below with the specific ones you are currently working with.
-
-```bash
-ffmpeg -y \
--i IMG_20250625_095548.jpg \
--i IMG_20250625_131322.jpg \
--i IMG_20250625_144319.jpg \
--i IMG_2712.jpg \
--i IMG_2761.jpg \
--i background_music.mp3 \
--filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z='min(zoom+0.0015,1.5)':d=125,fade=t=in:st=0:d=1,fade=t=out:st=4:d=1,drawtext=text='Exploring the Japanese Tea Garden':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.5:boxborderw=5[v0]; \
-[1:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z='min(zoom+0.0015,1.5)':d=125,fade=t=in:st=0:d=1,fade=t=out:st=4:d=1,drawtext=text='Pizza with a view of the Golden Gate':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.5:boxborderw=5[v1]; \
-[2:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z='min(zoom+0.0015,1.5)':d=125,fade=t=in:st=0:d=1,fade=t=out:st=4:d=1,drawtext=text='Checking out the cool lighthouse lens!':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.5:boxborderw=5[v2]; \
-[3:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z='min(zoom+0.0015,1.5)':d=125,fade=t=in:st=0:d=1,fade=t=out:st=4:d=1,drawtext=text='Beach day selfie!':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.5:boxborderw=5[v3]; \
-[4:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z='min(zoom+0.0015,1.5)':d=125,fade=t=in:st=0:d=1,fade=t=out:st=4:d=1,drawtext=text='Homeward bound!':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.5:boxborderw=5[v4]; \
-[v0][v1][v2][v3][v4]concat=n=5:v=1:a=0,format=yuv420p[v]" \
--map "[v]" -map 5:a -c:v libx264 -c:a aac -shortest montage.mp4
-```
+*   **Honesty and Transparency:** Never claim to have performed an action (like analyzing an image or downloading a file) if you have not. If you make a mistake, acknowledge it clearly, apologize, and state your plan to correct it.
+*   **Absolute Paths:** All file paths provided to tools **MUST** be absolute. If you are unsure of the current directory, use `${ShellTool.Name}` with the `pwd` command to get the absolute path first.
+*   **User Confirmation:** Always seek user confirmation on the generated plan (especially the captions) before starting long-running tasks like video generation.
