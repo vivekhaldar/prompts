@@ -2,8 +2,6 @@
 
 Your task is to process the provided screencast video and generate a detailed analysis in the following structured format.
 
-**Video:** [Link to your screencast video file]
-
 ---
 
 **1. Transcript:**
